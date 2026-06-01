@@ -1,0 +1,183 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&display=swap');
+
+@layer base {
+  :root {
+    --coral: #FF5E62;
+    --orange-warm: #FF9966;
+    --dark-bg: #0F0F0F;
+    --dark-card: #1A1A1A;
+    --dark-hover: #252525;
+    --dark-border: #2A2A2A;
+    --accent-teal: #00D4AA;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A0A0A0;
+  }
+
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--dark-bg);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--dark-bg);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #555;
+  }
+}
+
+@layer components {
+  /* Gradient button */
+  .btn-gradient {
+    @apply relative inline-flex items-center justify-center px-6 py-3 font-semibold text-white rounded-xl transition-all duration-300;
+    background: linear-gradient(135deg, #FF5E62 0%, #FF9966 100%);
+  }
+
+  .btn-gradient:hover {
+    background: linear-gradient(135deg, #FF4E52 0%, #FF8956 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(255, 94, 98, 0.35);
+  }
+
+  .btn-gradient:active {
+    transform: translateY(0);
+  }
+
+  /* Outlined button */
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-6 py-3 font-semibold text-white rounded-xl border border-white/20 transition-all duration-300 hover:border-white/40 hover:bg-white/5;
+  }
+
+  /* Glass card */
+  .glass-card {
+    @apply rounded-2xl border border-white/10 backdrop-blur-sm;
+    background: rgba(26, 26, 26, 0.8);
+  }
+
+  /* Creator card */
+  .creator-card {
+    @apply rounded-2xl border border-dark-border bg-dark-card p-5 transition-all duration-300;
+  }
+
+  .creator-card:hover {
+    transform: scale(1.03);
+    border-color: rgba(255, 94, 98, 0.4);
+    box-shadow: 0 8px 30px rgba(255, 94, 98, 0.15);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    @apply font-bold bg-clip-text text-transparent;
+    background-image: linear-gradient(135deg, #FF5E62 0%, #FF9966 100%);
+  }
+
+  /* Pill/tag */
+  .creator-pill {
+    @apply inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-200;
+    background: rgba(255, 94, 98, 0.12);
+    color: #FF5E62;
+    border: 1px solid rgba(255, 94, 98, 0.2);
+  }
+
+  .creator-pill:hover {
+    background: rgba(255, 94, 98, 0.2);
+  }
+
+  .creator-pill.active {
+    background: linear-gradient(135deg, #FF5E62 0%, #FF9966 100%);
+    color: white;
+    border-color: transparent;
+  }
+
+  /* Input styling */
+  .input-dark {
+    @apply w-full px-4 py-3 rounded-xl bg-dark-hover border border-dark-border text-white placeholder-muted focus:outline-none focus:border-coral transition-colors duration-200;
+  }
+
+  .input-dark:focus {
+    box-shadow: 0 0 0 2px rgba(255, 94, 98, 0.2);
+  }
+
+  /* Loading skeleton */
+  .skeleton {
+    @apply rounded-xl;
+    background: linear-gradient(90deg, #1A1A1A 25%, #252525 50%, #1A1A1A 75%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s ease-in-out infinite;
+  }
+
+  /* Message bubbles */
+  .message-sent {
+    @apply rounded-2xl rounded-br-md px-4 py-2.5;
+    background: linear-gradient(135deg, #FF5E62 0%, #FF9966 100%);
+  }
+
+  .message-received {
+    @apply rounded-2xl rounded-bl-md px-4 py-2.5 bg-dark-hover;
+  }
+
+  /* Page container */
+  .page-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+  }
+}
+
+@layer utilities {
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+  .animate-delay-400 {
+    animation-delay: 400ms;
+  }
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
