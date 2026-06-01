@@ -43,7 +43,7 @@ export async function updateSession(request: NextRequest) {
     '/my-collabs',
     '/setup-profile',
   ];
-  const authRoutes = ['/login', '/signup'];
+  const authRoutes = ['/login', '/signup', '/forgot-password'];
   const pathname = request.nextUrl.pathname;
 
   // Check if current route is protected

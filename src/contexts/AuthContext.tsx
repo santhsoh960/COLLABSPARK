@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { User } from '@supabase/supabase-js';
+import type { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import type { Profile } from '@/lib/types';
 
 interface AuthContextType {
@@ -32,6 +32,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Use the singleton client — avoids re-creating on every render
   const supabase = createClient();
 
   const fetchProfile = useCallback(
@@ -60,7 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [supabase]);
 
   useEffect(() => {
-    const getUser = async () => {
+    // Get initial session
+    const getInitialUser = async () => {
       const {
         data: { user: currentUser },
       } = await supabase.auth.getUser();
@@ -72,18 +75,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     };
 
-    getUser();
+    getInitialUser();
 
+    // Listen for auth state changes (login, logout, token refresh)
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session: Session | null) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
+
       if (currentUser) {
         await fetchProfile(currentUser.id);
       } else {
         setProfile(null);
       }
+
+      // Only set loading to false after initial event
       setLoading(false);
     });
 

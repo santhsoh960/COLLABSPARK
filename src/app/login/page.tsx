@@ -8,7 +8,6 @@ import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = createClient();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,12 +21,23 @@ export default function LoginPage() {
     setError('');
 
     try {
+      const supabase = createClient();
+
       const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.trim(),
         password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        if (authError.message.includes('Invalid login credentials') || authError.message.includes('invalid_credentials')) {
+          setError('Incorrect email or password. Please try again.');
+        } else if (authError.message.includes('Email not confirmed')) {
+          setError('Please confirm your email address before logging in. Check your inbox for a verification link.');
+        } else {
+          setError(authError.message);
+        }
+        return;
+      }
 
       // Check if profile exists
       if (data.user) {
@@ -39,27 +49,40 @@ export default function LoginPage() {
 
         if (profile?.username) {
           router.push('/discover');
+          router.refresh();
         } else {
           router.push('/setup-profile');
+          router.refresh();
         }
       }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Invalid email or password';
-      setError(errorMessage);
+      console.error('Login error:', err);
+      if (err instanceof TypeError && err.message === 'Failed to fetch') {
+        setError('Unable to connect to the server. Please check your internet connection and try again.');
+      } else {
+        const errorMessage = err instanceof Error ? err.message : 'Something went wrong. Please try again.';
+        setError(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
-    });
-    if (error) {
-      setError(error.message);
+    try {
+      const supabase = createClient();
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${window.location.origin}/auth/callback`,
+        },
+      });
+      if (error) {
+        setError(error.message);
+      }
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to connect with Google';
+      setError(errorMessage);
     }
   };
 
@@ -93,6 +116,7 @@ export default function LoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   required
+                  autoComplete="email"
                   className="input-dark pl-10 text-sm"
                 />
               </div>
@@ -117,6 +141,7 @@ export default function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
+                  autoComplete="current-password"
                   className="input-dark pl-10 pr-10 text-sm"
                 />
                 <button
@@ -134,7 +159,7 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="bg-red-400/10 text-red-400 text-sm px-4 py-3 rounded-xl">
+              <div className="bg-red-400/10 text-red-400 text-sm px-4 py-3 rounded-xl leading-relaxed">
                 {error}
               </div>
             )}

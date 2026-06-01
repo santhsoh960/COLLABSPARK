@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
+import type { RealtimePostgresInsertPayload } from '@supabase/supabase-js';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppNavbar } from '@/components/Navbar';
 import {
@@ -56,7 +57,7 @@ export default function NotificationsPage() {
           table: 'notifications',
           filter: `user_id=eq.${user?.id}`,
         },
-        async (payload) => {
+        async (payload: RealtimePostgresInsertPayload<Record<string, unknown>>) => {
           // Fetch the full notification with joined profile
           const { data } = await supabase
             .from('notifications')

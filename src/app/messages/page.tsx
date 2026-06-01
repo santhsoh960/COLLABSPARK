@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { AppNavbar } from '@/components/Navbar';
+import type { RealtimePostgresInsertPayload } from '@supabase/supabase-js';
 import {
   type Profile,
   type Conversation,
@@ -67,7 +68,7 @@ function MessagesContent() {
     // Group by conversation
     const convMap = new Map<string, { messages: ChatMessage[]; otherUserId: string }>();
 
-    for (const msg of allMessages) {
+    for (const msg of (allMessages as ChatMessage[])) {
       const otherUserId = msg.sender_id === user.id ? msg.receiver_id : msg.sender_id;
       const convId = generateConversationId(user.id, otherUserId);
 
@@ -92,7 +93,7 @@ function MessagesContent() {
       .in('id', otherUserIds);
 
     const profileMap = new Map<string, Profile>();
-    profiles?.forEach((p) => profileMap.set(p.id, p));
+    profiles?.forEach((p: Profile) => profileMap.set(p.id, p));
 
     const convList: Conversation[] = [];
     convMap.forEach((conv, convId) => {
@@ -176,8 +177,8 @@ function MessagesContent() {
 
         // Mark unread messages as read
         const unreadIds = data
-          .filter((m) => m.receiver_id === user.id && !m.is_read)
-          .map((m) => m.id);
+          .filter((m: ChatMessage) => m.receiver_id === user.id && !m.is_read)
+          .map((m: ChatMessage) => m.id);
 
         if (unreadIds.length > 0) {
           await supabase
@@ -201,7 +202,7 @@ function MessagesContent() {
           table: 'messages',
           filter: `conversation_id=eq.${activeConversation.conversation_id}`,
         },
-        (payload) => {
+        (payload: RealtimePostgresInsertPayload<ChatMessage>) => {
           const newMsg = payload.new as ChatMessage;
           setMessages((prev) => {
             if (prev.find((m) => m.id === newMsg.id)) return prev;
