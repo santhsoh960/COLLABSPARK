@@ -1,19 +1,39 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  // Pre-populate error from auth callback redirect (e.g. expired link, OAuth cancel)
+  const [error, setError] = useState(() => {
+    const callbackError = searchParams.get('error');
+    if (!callbackError) return '';
+    const messages: Record<string, string> = {
+      link_expired: 'This link has expired or was already used. Please request a new one.',
+      missing_code: 'Invalid login link. Please try signing in again.',
+      no_user: 'Authentication failed. Please try again.',
+      exchange_failed: searchParams.get('message') ?? 'Authentication failed. Please try again.',
+      access_denied: 'Google sign-in was cancelled.',
+    };
+    return messages[callbackError] ?? 'Authentication error. Please try again.';
+  });
+
+  // Clear callback error param from URL without triggering a re-render
+  useEffect(() => {
+    if (searchParams.get('error')) {
+      window.history.replaceState({}, '', '/login');
+    }
+  }, [searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -210,5 +230,17 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-dark flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-coral/30 border-t-coral rounded-full animate-spin" />
+      </main>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
